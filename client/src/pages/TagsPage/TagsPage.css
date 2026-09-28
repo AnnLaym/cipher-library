@@ -1,0 +1,180 @@
+.tags-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Единая панель со списком корневых тегов, разделённых тонкими линиями. */
+.tag-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.tag-panel--form {
+  padding: 4px 0;
+}
+
+.tag-panel > .tag-branch {
+  padding: 14px 16px;
+}
+
+.tag-panel > .tag-branch + .tag-branch {
+  border-top: 1px solid var(--border);
+}
+
+.tag-branch--nested {
+  margin: 12px 0 0 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--border-strong);
+}
+
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+}
+
+.tag-row__path {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-row__actions {
+  align-items: center;
+  margin-left: auto;
+}
+
+.tag-row__actions .btn {
+  margin-right: 4px;
+  border-color: transparent;
+}
+
+.tag-branch__children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-left: 14px;
+}
+
+.tag-branch--nested > .tag-branch__children {
+  padding-left: 0;
+}
+
+.tag-branch__count {
+  margin-left: 2px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+/* Форма тега */
+
+.tag-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 4px 0;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.tag-panel--form .tag-form {
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+.tag-branch > .tag-form + .tag-branch__children,
+.tag-branch > .tag-row + .tag-form {
+  margin-top: 10px;
+}
+
+.tag-form__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.tag-form__color {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tag-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .tag-form__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Выбор цвета */
+
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--swatch);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: box-shadow 0.12s;
+}
+
+.swatch[aria-checked='true'] {
+  box-shadow:
+    0 0 0 2px var(--bg-elevated),
+    0 0 0 4px var(--swatch);
+}
+
+.swatch--custom {
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+}
+
+.swatch--custom.is-custom {
+  border: 0;
+  background: var(--swatch);
+}
+
+.swatch--custom:hover {
+  color: var(--text);
+}
+
+.swatch__native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}

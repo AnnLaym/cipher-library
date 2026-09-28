@@ -1,0 +1,76 @@
+.tag-filter {
+  position: sticky;
+  top: 76px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tag-filter__title {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tag-filter__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.tag-filter__note a {
+  color: var(--accent);
+}
+
+.tag-filter__level {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-filter__level .tag-filter__level {
+  margin-left: 11px;
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+}
+
+.tag-filter__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 0;
+}
+
+.tag-filter__toggle,
+.tag-filter__spacer {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.tag-filter__toggle {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tag-filter__toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.tag-filter__toggle .icon {
+  transition: transform 0.12s;
+}
+
+.tag-filter__toggle.is-open .icon {
+  transform: rotate(90deg);
+}

@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Путь относительно этого файла. Сервер использует тот же файл: см. server/src/config.ts.
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data/ciphers.db"
+}
+
+model Cipher {
+  id          Int         @id @default(autoincrement())
+  word        String
+  description String      @default("")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tags        CipherTag[]
+}
+
+model Tag {
+  id             Int         @id @default(autoincrement())
+  name           String
+  // Название в нижнем регистре без лишних пробелов — гарантирует, что «еда», «Еда» и «ЕДА» не сосуществуют.
+  normalizedName String      @unique
+  color          String
+  parentId       Int?
+  parent         Tag?        @relation("TagTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children       Tag[]       @relation("TagTree")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  ciphers        CipherTag[]
+
+  @@index([parentId])
+}
+
+model CipherTag {
+  cipherId Int
+  tagId    Int
+  // Порядок тега внутри шифра (0, 1, 2, ...).
+  position Int
+  cipher   Cipher @relation(fields: [cipherId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([cipherId, tagId])
+  @@index([tagId])
+}

@@ -1,0 +1,33 @@
+.cipher-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.cipher-form__word {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.cipher-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cipher-form__hint {
+  margin-right: auto;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .cipher-form__hint {
+    display: none;
+  }
+}

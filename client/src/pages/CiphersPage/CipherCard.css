@@ -1,0 +1,46 @@
+.cipher-card {
+  padding: 16px 18px 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  transition: border-color 0.12s;
+}
+
+.cipher-card:hover {
+  border-color: var(--border-strong);
+}
+
+.cipher-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cipher-card__word {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  overflow-wrap: anywhere;
+}
+
+.cipher-card__head .hover-actions {
+  margin: -2px -6px 0 0;
+}
+
+.cipher-card__description {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cipher-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}

@@ -1,0 +1,58 @@
+.ciphers-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  gap: 32px;
+}
+
+.ciphers-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cipher-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.results-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.results-bar__count {
+  margin-right: 4px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.results-bar__count strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.results-bar__reset {
+  margin-left: 4px;
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .ciphers-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .ciphers-layout .tag-filter {
+    position: static;
+    max-height: 240px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+}
