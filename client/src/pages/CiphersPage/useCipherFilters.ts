@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { DEFAULT_CIPHER_SORT, formatCipherSort, parseCipherSort, type CipherSort } from '../../../../shared/cipherSort';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 const SEARCH_DELAY_MS = 200;
@@ -14,8 +15,8 @@ function parseTagIds(raw: string | null): number[] {
 }
 
 /**
- * Поиск и выбранные теги сохраняются в адресной строке (?q=…&tags=1,2) и переживают перезагрузку.
- * Текст поля хранится локально, а в адрес и запрос попадает с небольшой задержкой.
+ * Поиск, выбранные теги и сортировка сохраняются в адресной строке (?q=…&tags=1,2&sort=date-desc)
+ * и переживают перезагрузку. Текст поля хранится локально, а в адрес и запрос попадает с небольшой задержкой.
  */
 export function useCipherFilters() {
   const [params, setParams] = useSearchParams();
@@ -23,9 +24,11 @@ export function useCipherFilters() {
   const appliedQuery = useDebouncedValue(query, SEARCH_DELAY_MS).trim();
   const tagParam = params.get('tags');
   const tagIds = useMemo(() => parseTagIds(tagParam), [tagParam]);
+  const sortParam = params.get('sort');
+  const sort = useMemo(() => parseCipherSort(sortParam), [sortParam]);
 
   const writeParams = useCallback(
-    (next: { q?: string; tagIds?: number[] }) => {
+    (next: { q?: string; tagIds?: number[]; sort?: CipherSort }) => {
       setParams(
         (prev) => {
           const result = new URLSearchParams(prev);
@@ -36,6 +39,11 @@ export function useCipherFilters() {
           if (next.tagIds !== undefined) {
             if (next.tagIds.length > 0) result.set('tags', next.tagIds.join(','));
             else result.delete('tags');
+          }
+          if (next.sort !== undefined) {
+            const value = formatCipherSort(next.sort);
+            if (value !== formatCipherSort(DEFAULT_CIPHER_SORT)) result.set('sort', value);
+            else result.delete('sort');
           }
           return result;
         },
@@ -57,8 +65,10 @@ export function useCipherFilters() {
       /** Текст, по которому уже выполняется поиск. */
       appliedQuery,
       tagIds,
+      sort,
       hasFilters: appliedQuery !== '' || tagIds.length > 0,
       setQuery,
+      setSort: (next: CipherSort) => writeParams({ sort: next }),
       setTagIds: (ids: number[]) => writeParams({ tagIds: ids }),
       toggleTag: (id: number) =>
         writeParams({ tagIds: tagIds.includes(id) ? tagIds.filter((tagId) => tagId !== id) : [...tagIds, id] }),
@@ -67,6 +77,6 @@ export function useCipherFilters() {
         writeParams({ q: '', tagIds: [] });
       },
     }),
-    [query, appliedQuery, tagIds, writeParams],
+    [query, appliedQuery, tagIds, sort, writeParams],
   );
 }

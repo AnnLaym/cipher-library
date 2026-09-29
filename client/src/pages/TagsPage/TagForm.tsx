@@ -3,10 +3,10 @@ import { DEFAULT_TAG_COLOR } from '../../../../shared/colors';
 import { formatTagName, normalizeTagName } from '../../../../shared/tagName';
 import type { TagDTO, TagInput } from '../../../../shared/types';
 import { errorMessage } from '../../api/http';
+import { ColorPicker } from '../../components/ColorPicker';
 import { TagChip } from '../../components/TagChip';
 import { useTags } from '../../context/TagsContext';
 import { flattenTree } from '../../lib/tagIndex';
-import { ColorPicker } from './ColorPicker';
 
 interface TagFormProps {
   /** Редактируемый тег; без него форма создаёт новый. */
@@ -20,7 +20,10 @@ export function TagForm({ tag, defaultParentId = null, onSubmit, onCancel }: Tag
   const { index } = useTags();
   const fieldId = useId();
   const [name, setName] = useState(tag?.name ?? '');
-  const [parentId, setParentId] = useState<number | null>(tag?.parentId ?? defaultParentId);
+  const [parentIds, setParentIds] = useState<(number | null)[]>(() => {
+    const initial = tag ? index.parentsOf(tag.id).map((parent) => parent.id) : [defaultParentId];
+    return [initial[0] ?? null, initial[1] ?? null];
+  });
   const [color, setColor] = useState(tag?.color ?? DEFAULT_TAG_COLOR);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -28,6 +31,13 @@ export function TagForm({ tag, defaultParentId = null, onSubmit, onCancel }: Tag
   const options = useMemo(() => flattenTree(index), [index]);
   // Нельзя выбрать родителем сам тег или его потомка — получится цикл (сервер проверяет то же самое).
   const blockedParents = useMemo(() => (tag ? index.descendantsOf(tag.id) : new Set<number>()), [index, tag]);
+
+  const setParent = (slot: number, value: number | null) => {
+    const next = [...parentIds];
+    next[slot] = value;
+    // Второй родитель без первого становится первым.
+    setParentIds(next[0] === null ? [next[1], null] : next);
+  };
 
   const clash = index.byNormalizedName.get(normalizeTagName(name));
   const duplicate = clash && clash.id !== tag?.id ? clash : undefined;
@@ -42,7 +52,7 @@ export function TagForm({ tag, defaultParentId = null, onSubmit, onCancel }: Tag
     setSaving(true);
     setError(null);
     try {
-      await onSubmit({ name, color, parentId });
+      await onSubmit({ name, color, parentIds: parentIds.filter((id) => id !== null) });
     } catch (err) {
       setError(errorMessage(err));
       setSaving(false);
@@ -70,24 +80,34 @@ export function TagForm({ tag, defaultParentId = null, onSubmit, onCancel }: Tag
           />
         </div>
 
-        <div className="field">
-          <label className="field-label" htmlFor={`${fieldId}-parent`}>
-            Родитель
-          </label>
-          <select
-            id={`${fieldId}-parent`}
-            className="select"
-            value={parentId ?? ''}
-            onChange={(event) => setParentId(event.target.value ? Number(event.target.value) : null)}
-          >
-            <option value="">Без родителя</option>
-            {options.map((option) => (
-              <option key={option.id} value={option.id} disabled={blockedParents.has(option.id)}>
-                {index.pathLabel(option.id)}
-              </option>
-            ))}
-          </select>
-        </div>
+        {parentIds.map((parentId, slot) => {
+          const otherId = parentIds[1 - slot];
+          return (
+            <div key={slot} className="field">
+              <label className="field-label" htmlFor={`${fieldId}-parent-${slot}`}>
+                {slot === 0 ? 'Родитель' : 'Второй родитель'}
+              </label>
+              <select
+                id={`${fieldId}-parent-${slot}`}
+                className="select"
+                value={parentId ?? ''}
+                disabled={slot === 1 && parentIds[0] === null}
+                onChange={(event) => setParent(slot, event.target.value ? Number(event.target.value) : null)}
+              >
+                <option value="">{slot === 0 ? 'Без родителя' : 'Нет'}</option>
+                {options.map((option) => (
+                  <option
+                    key={option.id}
+                    value={option.id}
+                    disabled={blockedParents.has(option.id) || option.id === otherId}
+                  >
+                    {index.pathLabel(option.id)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        })}
       </div>
 
       <div className="field">

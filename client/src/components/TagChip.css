@@ -52,8 +52,15 @@ button.tag-chip:hover {
   box-shadow: 0 0 0 1px var(--tag-text);
 }
 
-.tag-chip.is-pending {
-  border-style: dashed;
+/* Сколько вложенных тегов у тега. */
+.tag-chip__count {
+  margin-left: 2px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
 }
 
 .tag-chip__remove {

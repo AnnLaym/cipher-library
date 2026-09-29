@@ -2,10 +2,12 @@ import type { TagDTO } from '../../../../shared/types';
 import { TagChip } from '../../components/TagChip';
 import { TagForm } from './TagForm';
 import { TagRow } from './TagRow';
-import { isAddingChildTo, isEditing, type TagTreeController } from './tagTreeController';
+import { branchKey, isAddingChildTo, isEditing, type TagTreeController } from './tagTreeController';
 
 interface TagBranchProps {
   tag: TagDTO;
+  /** Положение ветки в дереве, см. branchKey. */
+  at: string;
   depth: number;
   tree: TagTreeController;
 }
@@ -14,19 +16,19 @@ interface TagBranchProps {
  * Ветка дерева: строка тега, его непосредственные дети в одну строку
  * и раскрытые дети ниже — рекурсивно, без ограничения глубины.
  */
-export function TagBranch({ tag, depth, tree }: TagBranchProps) {
+export function TagBranch({ tag, at, depth, tree }: TagBranchProps) {
   const children = tree.index.childrenOf(tag.id);
-  const openChildren = children.filter((child) => tree.isOpen(child.id));
+  const openChildren = children.filter((child) => tree.isOpen(branchKey(at, child.id)));
 
   return (
     <div className={depth === 0 ? 'tag-branch' : 'tag-branch tag-branch--nested'}>
-      {isEditing(tree.editor, tag.id) ? (
+      {isEditing(tree.editor, at) ? (
         <TagForm tag={tag} onSubmit={tree.save} onCancel={tree.closeEditor} />
       ) : (
-        <TagRow tag={tag} tree={tree} size={depth === 0 ? 'md' : 'sm'} showPath={depth > 0} />
+        <TagRow tag={tag} at={at} tree={tree} size={depth === 0 ? 'md' : 'sm'} showPath={depth > 0} />
       )}
 
-      {isAddingChildTo(tree.editor, tag.id) && (
+      {isAddingChildTo(tree.editor, at) && (
         <TagForm defaultParentId={tag.id} onSubmit={tree.save} onCancel={tree.closeEditor} />
       )}
 
@@ -39,9 +41,9 @@ export function TagBranch({ tag, depth, tree }: TagBranchProps) {
                 key={child.id}
                 name={child.name}
                 color={child.color}
-                active={tree.isOpen(child.id)}
-                trailing={grandchildren > 0 && <span className="tag-branch__count">{grandchildren}</span>}
-                onClick={() => tree.toggleOpen(child.id)}
+                active={tree.isOpen(branchKey(at, child.id))}
+                trailing={grandchildren > 0 && <span className="tag-chip__count">{grandchildren}</span>}
+                onClick={() => tree.toggleOpen(branchKey(at, child.id))}
               />
             );
           })}
@@ -49,7 +51,7 @@ export function TagBranch({ tag, depth, tree }: TagBranchProps) {
       )}
 
       {openChildren.map((child) => (
-        <TagBranch key={child.id} tag={child} depth={depth + 1} tree={tree} />
+        <TagBranch key={child.id} tag={child} at={branchKey(at, child.id)} depth={depth + 1} tree={tree} />
       ))}
     </div>
   );

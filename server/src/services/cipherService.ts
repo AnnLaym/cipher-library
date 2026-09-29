@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client';
+import { compareCiphers, type CipherSort } from '../../../shared/cipherSort';
 import type { CipherDTO, CipherInput } from '../../../shared/types';
 import { prisma, type Tx } from '../db';
 import { notFound } from '../errors';
@@ -24,12 +25,6 @@ function toDTO(cipher: CipherWithTags): CipherDTO {
   };
 }
 
-const alphabetical = new Intl.Collator('ru', { sensitivity: 'base', numeric: true });
-
-function byWord(a: CipherDTO, b: CipherDTO): number {
-  return alphabetical.compare(a.word, b.word) || a.id - b.id;
-}
-
 // SQLite LIKE не учитывает регистр кириллицы, поэтому текстовый поиск выполняется здесь.
 function matchesText(cipher: CipherDTO, query: string): boolean {
   return cipher.word.toLowerCase().includes(query) || cipher.description.toLowerCase().includes(query);
@@ -51,10 +46,10 @@ async function findOrThrow(id: number, db: Tx = prisma): Promise<CipherWithTags>
 
 export const cipherService = {
   /**
-   * Текст ищется по слову и описанию, а каждый выбранный тег — с учётом всех его потомков.
+   * Текст ищется по слову и описанию, а каждый выбранный тег — с учётом всех его потомков по всем веткам.
    * Условия объединяются через AND.
    */
-  async list(query: string, tagIds: readonly number[]): Promise<CipherDTO[]> {
+  async list(query: string, tagIds: readonly number[], sort: CipherSort): Promise<CipherDTO[]> {
     const tagGroups = await tagService.expandWithDescendants(tagIds);
     const ciphers = await prisma.cipher.findMany({
       where: {
@@ -67,7 +62,7 @@ export const cipherService = {
     return ciphers
       .map(toDTO)
       .filter((cipher) => text === '' || matchesText(cipher, text))
-      .sort(byWord);
+      .sort(compareCiphers(sort));
   },
 
   async get(id: number): Promise<CipherDTO> {

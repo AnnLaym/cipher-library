@@ -66,16 +66,6 @@
   padding-left: 0;
 }
 
-.tag-branch__count {
-  margin-left: 2px;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: var(--tag-bg);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.85;
-}
-
 /* Форма тега */
 
 .tag-form {
@@ -102,7 +92,7 @@
 
 .tag-form__fields {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -124,57 +114,4 @@
   .tag-form__fields {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-/* Выбор цвета */
-
-.color-picker {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.swatch {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--swatch);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: box-shadow 0.12s;
-}
-
-.swatch[aria-checked='true'] {
-  box-shadow:
-    0 0 0 2px var(--bg-elevated),
-    0 0 0 4px var(--swatch);
-}
-
-.swatch--custom {
-  border: 1px dashed var(--border-strong);
-  background: transparent;
-}
-
-.swatch--custom.is-custom {
-  border: 0;
-  background: var(--swatch);
-}
-
-.swatch--custom:hover {
-  color: var(--text);
-}
-
-.swatch__native {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
 }

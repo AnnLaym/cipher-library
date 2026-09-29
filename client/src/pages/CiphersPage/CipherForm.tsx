@@ -2,7 +2,6 @@ import { useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'rea
 import type { CipherDTO, CipherInput } from '../../../../shared/types';
 import { errorMessage } from '../../api/http';
 import { TagInput } from '../../components/TagInput/TagInput';
-import { draftsFromCipher, draftsToInput, type TagDraft } from '../../components/TagInput/tagDraft';
 import { useTags } from '../../context/TagsContext';
 import './CipherForm.css';
 
@@ -20,7 +19,7 @@ export function CipherForm({ cipher, onSubmit, onCancel }: CipherFormProps) {
   const wordRef = useRef<HTMLInputElement>(null);
   const [word, setWord] = useState(cipher?.word ?? '');
   const [description, setDescription] = useState(cipher?.description ?? '');
-  const [tags, setTags] = useState<TagDraft[]>(() => draftsFromCipher(cipher?.tags ?? []));
+  const [tagIds, setTagIds] = useState<number[]>(() => cipher?.tags.map((tag) => tag.id) ?? []);
   const [wordError, setWordError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -36,7 +35,9 @@ export function CipherForm({ cipher, onSubmit, onCancel }: CipherFormProps) {
     setSaving(true);
     setError(null);
     try {
-      await onSubmit({ word: word.trim(), description: description.trim(), tags: draftsToInput(tags, index) });
+      // Порядок сохраняется; теги, удалённые за время редактирования, пропускаются.
+      const tags = tagIds.filter((id) => index.byId.has(id)).map((id) => ({ id }));
+      await onSubmit({ word: word.trim(), description: description.trim(), tags });
     } catch (err) {
       setError(errorMessage(err));
       setSaving(false);
@@ -89,7 +90,7 @@ export function CipherForm({ cipher, onSubmit, onCancel }: CipherFormProps) {
         <label className="field-label" htmlFor={`${fieldId}-tags`}>
           Теги
         </label>
-        <TagInput id={`${fieldId}-tags`} value={tags} onChange={setTags} />
+        <TagInput id={`${fieldId}-tags`} value={tagIds} onChange={setTagIds} />
       </div>
 
       {error && <p className="form-error">{error}</p>}

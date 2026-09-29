@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { formatCipherSort, parseCipherSort } from '../../../shared/cipherSort';
 import type { CipherDTO } from '../../../shared/types';
 import { ciphersApi, type CipherFilters } from '../api/ciphers';
 import { errorMessage, isAbortError } from '../api/http';
@@ -10,22 +11,23 @@ interface CiphersState {
 }
 
 /** Загружает шифры по фильтрам. Во время повторной загрузки показываются предыдущие результаты. */
-export function useCiphers({ query, tagIds }: CipherFilters) {
+export function useCiphers({ query, tagIds, sort }: CipherFilters) {
   const [state, setState] = useState<CiphersState>({ ciphers: [], status: 'loading', error: null });
   const [version, setVersion] = useState(0);
   const tagKey = tagIds.join(',');
+  const sortKey = formatCipherSort(sort);
 
   useEffect(() => {
     const controller = new AbortController();
     const ids = tagKey ? tagKey.split(',').map(Number) : [];
     ciphersApi
-      .list({ query, tagIds: ids }, controller.signal)
+      .list({ query, tagIds: ids, sort: parseCipherSort(sortKey) }, controller.signal)
       .then((ciphers) => setState({ ciphers, status: 'ready', error: null }))
       .catch((error: unknown) => {
         if (!isAbortError(error)) setState((prev) => ({ ...prev, status: 'error', error: errorMessage(error) }));
       });
     return () => controller.abort();
-  }, [query, tagKey, version]);
+  }, [query, tagKey, sortKey, version]);
 
   const reload = useCallback(() => setVersion((v) => v + 1), []);
 

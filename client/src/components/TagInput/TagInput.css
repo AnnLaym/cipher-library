@@ -182,15 +182,43 @@
   border-top: 1px solid var(--border);
   border-radius: 0 0 6px 6px;
   background: var(--bg-elevated);
-  color: var(--accent);
 }
 
 .tag-suggest__create:first-child {
   border-top: 0;
 }
 
-.tag-suggest__create.is-active {
-  background: var(--bg-hover);
+.tag-suggest__create .tag-suggest__row {
+  color: var(--accent);
+}
+
+/* Кружок цвета нового тега; по нажатию под строкой открывается палитра. */
+.tag-suggest__color {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0 6px 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--swatch);
+  cursor: pointer;
+  transition: box-shadow 0.12s;
+}
+
+.tag-suggest__color:hover,
+.tag-suggest__color[aria-expanded='true'] {
+  box-shadow:
+    0 0 0 2px var(--bg-elevated),
+    0 0 0 3px var(--swatch);
+}
+
+.tag-suggest__color + .tag-suggest__kbd {
+  margin-left: 0;
+}
+
+.tag-suggest__palette {
+  padding: 6px 10px 10px;
 }
 
 .tag-suggest__kbd {

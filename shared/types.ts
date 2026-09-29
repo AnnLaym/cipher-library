@@ -4,7 +4,8 @@ export interface TagDTO {
   id: number;
   name: string;
   color: string;
-  parentId: number | null;
+  /** 0, 1 или 2 родителя. */
+  parentIds: number[];
   /** Сколько шифров используют этот тег напрямую. */
   cipherCount: number;
 }
@@ -37,7 +38,8 @@ export interface CipherInput {
 export interface TagInput {
   name: string;
   color: string;
-  parentId: number | null;
+  /** Не больше двух. */
+  parentIds: number[];
 }
 
 export type ApiErrorCode = 'VALIDATION' | 'NOT_FOUND' | 'TAG_EXISTS' | 'TAG_CYCLE' | 'INTERNAL';

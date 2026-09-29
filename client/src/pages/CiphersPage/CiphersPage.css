@@ -42,6 +42,12 @@
   font-size: 13px;
 }
 
+.cipher-sort {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
 @media (max-width: 860px) {
   .ciphers-layout {
     grid-template-columns: minmax(0, 1fr);

@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
-import { TAG_PALETTE } from '../../../../shared/colors';
-import { Icon } from '../../components/Icon';
+import { TAG_PALETTE } from '../../../shared/colors';
+import { useTags } from '../context/TagsContext';
+import { Icon } from './Icon';
+import './ColorPicker.css';
 
 interface ColorPickerProps {
   value: string;
@@ -9,20 +11,29 @@ interface ColorPickerProps {
 
 const swatchStyle = (color: string) => ({ '--swatch': color }) as CSSProperties;
 
-/** 8 базовых цветов и произвольный через системную палитру. */
+/**
+ * 8 базовых цветов, свои цвета, которыми сейчас окрашен хоть один тег,
+ * и произвольный через системную палитру.
+ */
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
+  const { index } = useTags();
   const current = value.toLowerCase();
-  const isCustom = !TAG_PALETTE.some((color) => color.value === current);
+  const swatches = [
+    ...TAG_PALETTE,
+    ...index.customColors.map((color) => ({ name: `Свой цвет ${color}`, value: color })),
+  ];
+  const isCustom = !swatches.some((color) => color.value === current);
 
   return (
     <div className="color-picker" role="radiogroup" aria-label="Цвет тега">
-      {TAG_PALETTE.map((color) => (
+      {swatches.map((color) => (
         <button
           key={color.value}
           type="button"
           role="radio"
           aria-checked={color.value === current}
           aria-label={color.name}
+          title={color.name}
           className="swatch"
           style={swatchStyle(color.value)}
           onClick={() => onChange(color.value)}

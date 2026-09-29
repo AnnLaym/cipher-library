@@ -10,50 +10,58 @@ import { DeleteTagDialog } from './DeleteTagDialog';
 import { TagBranch } from './TagBranch';
 import { TagForm } from './TagForm';
 import { TagRow } from './TagRow';
-import { isAddingChildTo, isEditing, type TagEditor, type TagTreeController } from './tagTreeController';
+import {
+  branchKey,
+  isAddingChildTo,
+  isEditing,
+  type TagEditor,
+  type TagTreeController,
+} from './tagTreeController';
 import './TagsPage.css';
 
 export function TagsPage() {
   const { index, status, error, reload } = useTags();
   const [query, setQuery] = useState('');
   const [editor, setEditor] = useState<TagEditor>(null);
-  const [openIds, setOpenIds] = useState<Set<number>>(new Set());
+  const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<TagDTO | null>(null);
 
   /** Раскрывает ветки так, чтобы тег с указанным родителем был виден в дереве. */
-  const revealUnder = (parentId: number | null) => {
-    if (parentId === null) return;
-    setOpenIds((prev) => new Set([...prev, ...index.pathOf(parentId).map((tag) => tag.id)]));
+  const revealUnder = (parentId: number | undefined) => {
+    if (parentId === undefined) return;
+    const keys: string[] = [];
+    for (const tag of index.pathOf(parentId)) keys.push(branchKey(keys.at(-1) ?? null, tag.id));
+    setOpenKeys((prev) => new Set([...prev, ...keys]));
   };
 
   const tree: TagTreeController = {
     index,
     editor,
-    isOpen: (id) => openIds.has(id),
-    toggleOpen: (id) =>
-      setOpenIds((prev) => {
+    isOpen: (at) => openKeys.has(at),
+    toggleOpen: (at) =>
+      setOpenKeys((prev) => {
         const next = new Set(prev);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
+        if (next.has(at)) next.delete(at);
+        else next.add(at);
         return next;
       }),
-    startCreateChild: (parent) => {
-      setEditor({ mode: 'create', parentId: parent.id });
+    startCreateChild: (parent, at) => {
+      setEditor({ mode: 'create', at });
       revealUnder(parent.id);
     },
-    startEdit: (tag) => setEditor({ mode: 'edit', tagId: tag.id }),
+    startEdit: (tag, at) => setEditor({ mode: 'edit', tagId: tag.id, at }),
     startDelete: setDeleting,
     closeEditor: () => setEditor(null),
     save: async (input: TagInput) => {
       if (editor?.mode === 'edit') await tagsApi.update(editor.tagId, input);
       else await tagsApi.create(input);
       await reload();
-      revealUnder(input.parentId);
+      revealUnder(input.parentIds[0]);
       setEditor(null);
     },
   };
 
-  const startCreateRoot = () => setEditor({ mode: 'create', parentId: null });
+  const startCreateRoot = () => setEditor({ mode: 'create', at: null });
 
   const deleteTag = async (tag: TagDTO) => {
     await tagsApi.remove(tag.id);
@@ -66,18 +74,21 @@ export function TagsPage() {
     if (results.length === 0) return <EmptyState title="Ничего не найдено." />;
     return (
       <div className="tag-panel">
-        {results.map((tag) => (
-          <div key={tag.id} className="tag-branch">
-            {isEditing(editor, tag.id) ? (
-              <TagForm tag={tag} onSubmit={tree.save} onCancel={tree.closeEditor} />
-            ) : (
-              <TagRow tag={tag} tree={tree} size="sm" showPath />
-            )}
-            {isAddingChildTo(editor, tag.id) && (
-              <TagForm defaultParentId={tag.id} onSubmit={tree.save} onCancel={tree.closeEditor} />
-            )}
-          </div>
-        ))}
+        {results.map((tag) => {
+          const at = `search:${tag.id}`;
+          return (
+            <div key={tag.id} className="tag-branch">
+              {isEditing(editor, at) ? (
+                <TagForm tag={tag} onSubmit={tree.save} onCancel={tree.closeEditor} />
+              ) : (
+                <TagRow tag={tag} at={at} tree={tree} size="sm" showPath />
+              )}
+              {isAddingChildTo(editor, at) && (
+                <TagForm defaultParentId={tag.id} onSubmit={tree.save} onCancel={tree.closeEditor} />
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -97,7 +108,7 @@ export function TagsPage() {
     return (
       <div className="tag-panel">
         {index.roots.map((root) => (
-          <TagBranch key={root.id} tag={root} depth={0} tree={tree} />
+          <TagBranch key={root.id} tag={root} at={branchKey(null, root.id)} depth={0} tree={tree} />
         ))}
       </div>
     );
@@ -109,7 +120,7 @@ export function TagsPage() {
     return query.trim() ? renderSearchResults() : renderTree();
   };
 
-  const creatingRoot = editor?.mode === 'create' && editor.parentId === null;
+  const creatingRoot = editor?.mode === 'create' && editor.at === null;
 
   return (
     <>

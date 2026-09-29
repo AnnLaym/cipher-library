@@ -16,7 +16,11 @@ import './CiphersPage.css';
 export function CiphersPage() {
   const filters = useCipherFilters();
   const tags = useTags();
-  const { ciphers, status, error, reload } = useCiphers({ query: filters.appliedQuery, tagIds: filters.tagIds });
+  const { ciphers, status, error, reload } = useCiphers({
+    query: filters.appliedQuery,
+    tagIds: filters.tagIds,
+    sort: filters.sort,
+  });
   const [adding, setAdding] = useState(false);
 
   // Теги, удалённые на странице «Теги», убираем из фильтра.
@@ -90,8 +94,10 @@ export function CiphersPage() {
               count={ciphers.length}
               hasFilters={filters.hasFilters}
               selectedTagIds={filters.tagIds}
+              sort={filters.sort}
               onRemoveTag={filters.toggleTag}
               onReset={filters.reset}
+              onSortChange={filters.setSort}
             />
           )}
           {adding && <CipherForm onSubmit={createCipher} onCancel={() => setAdding(false)} />}

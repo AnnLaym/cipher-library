@@ -226,6 +226,13 @@ select {
   height: 38px;
 }
 
+.select--sm {
+  width: auto;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 12.5px;
+}
+
 .textarea {
   min-height: 84px;
   padding-top: 9px;

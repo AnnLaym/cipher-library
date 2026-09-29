@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { parseCipherSort } from '../../shared/cipherSort';
 import { DEFAULT_TAG_COLOR, isHexColor } from '../../shared/colors';
 import { cleanTagName } from '../../shared/tagName';
+import { MAX_TAG_PARENTS } from '../../shared/tagTree';
 import { badRequest } from './errors';
 
 const tagName = z
@@ -17,7 +19,11 @@ export const tagInputSchema = z.object({
     .refine(isHexColor, 'Цвет должен быть в формате #rrggbb')
     .transform((color) => color.toLowerCase())
     .default(DEFAULT_TAG_COLOR),
-  parentId: id.nullable().default(null),
+  parentIds: z
+    .array(id)
+    .default([])
+    .transform((ids) => [...new Set(ids)])
+    .refine((ids) => ids.length <= MAX_TAG_PARENTS, `У тега может быть не больше ${MAX_TAG_PARENTS} родителей`),
 });
 
 export const cipherInputSchema = z.object({
@@ -40,6 +46,7 @@ export const cipherQuerySchema = z.object({
         .map(Number)
         .filter((tagId) => Number.isInteger(tagId) && tagId > 0),
     ),
+  sort: z.string().optional().transform(parseCipherSort),
 });
 
 export function parseId(raw: string): number {
