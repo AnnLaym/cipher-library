@@ -31,46 +31,18 @@
   list-style: none;
 }
 
+/* Дети — с минимальным отступом и тонкой линией, без лесенки вправо. */
 .tag-filter__level .tag-filter__level {
-  margin-left: 11px;
-  padding-left: 10px;
+  margin-left: 6px;
+  padding-left: 8px;
   border-left: 1px solid var(--border);
 }
 
 .tag-filter__row {
   display: flex;
-  align-items: center;
-  gap: 2px;
   padding: 2px 0;
 }
 
-.tag-filter__toggle,
-.tag-filter__spacer {
-  flex: none;
-  width: 20px;
-  height: 20px;
-}
-
-.tag-filter__toggle {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.tag-filter__toggle:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-}
-
-.tag-filter__toggle .icon {
-  transition: transform 0.12s;
-}
-
-.tag-filter__toggle.is-open .icon {
-  transform: rotate(90deg);
+.tag-filter__group-start {
+  margin-top: 8px;
 }

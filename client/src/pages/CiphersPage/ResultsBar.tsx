@@ -1,15 +1,20 @@
+import type { CipherSort } from '../../../../shared/cipherSort';
 import { TagChip } from '../../components/TagChip';
 import { useTags } from '../../context/TagsContext';
+import { CipherSortControl } from './CipherSortControl';
 
 interface ResultsBarProps {
   count: number;
   hasFilters: boolean;
   selectedTagIds: readonly number[];
+  sort: CipherSort;
   onRemoveTag: (id: number) => void;
   onReset: () => void;
+  onSortChange: (sort: CipherSort) => void;
 }
 
-export function ResultsBar({ count, hasFilters, selectedTagIds, onRemoveTag, onReset }: ResultsBarProps) {
+export function ResultsBar(props: ResultsBarProps) {
+  const { count, hasFilters, selectedTagIds, onRemoveTag, onReset } = props;
   const { index } = useTags();
   const selectedTags = selectedTagIds.flatMap((id) => index.byId.get(id) ?? []);
 
@@ -26,6 +31,7 @@ export function ResultsBar({ count, hasFilters, selectedTagIds, onRemoveTag, onR
           Сбросить фильтры
         </button>
       )}
+      <CipherSortControl value={props.sort} onChange={props.onSortChange} />
     </div>
   );
 }

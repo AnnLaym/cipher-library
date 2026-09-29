@@ -23,13 +23,22 @@ model Tag {
   // Название в нижнем регистре без лишних пробелов — гарантирует, что «еда», «Еда» и «ЕДА» не сосуществуют.
   normalizedName String      @unique
   color          String
-  parentId       Int?
-  parent         Tag?        @relation("TagTree", fields: [parentId], references: [id], onDelete: SetNull)
-  children       Tag[]       @relation("TagTree")
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   ciphers        CipherTag[]
+  parentLinks    TagParent[] @relation("TagChild")
+  childLinks     TagParent[] @relation("TagParent")
+}
 
+// Связь «родитель → ребёнок». У тега до двух родителей (проверяется сервером) и сколько угодно детей;
+// тег с двумя родителями — одна запись Tag, а не две копии.
+model TagParent {
+  childId  Int
+  parentId Int
+  child    Tag @relation("TagChild", fields: [childId], references: [id], onDelete: Cascade)
+  parent   Tag @relation("TagParent", fields: [parentId], references: [id], onDelete: Cascade)
+
+  @@id([childId, parentId])
   @@index([parentId])
 }
 

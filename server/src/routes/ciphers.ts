@@ -4,10 +4,10 @@ import { cipherInputSchema, cipherQuerySchema, parseId } from '../validation';
 
 export const ciphersRouter = Router();
 
-// GET /api/ciphers?q=мар&tags=1,5
+// GET /api/ciphers?q=мар&tags=1,5&sort=date-desc
 ciphersRouter.get('/', async (req, res) => {
-  const { q, tags } = cipherQuerySchema.parse(req.query);
-  res.json(await cipherService.list(q, tags));
+  const { q, tags, sort } = cipherQuerySchema.parse(req.query);
+  res.json(await cipherService.list(q, tags, sort));
 });
 
 ciphersRouter.get('/:id', async (req, res) => {

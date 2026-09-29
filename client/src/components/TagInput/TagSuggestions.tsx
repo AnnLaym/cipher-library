@@ -1,6 +1,7 @@
-import { useEffect, useRef, type MouseEvent } from 'react';
+import { useEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
 import type { TagDTO } from '../../../../shared/types';
 import type { TagIndex } from '../../lib/tagIndex';
+import { ColorPicker } from '../ColorPicker';
 import { Icon } from '../Icon';
 
 export type SuggestionRow = { type: 'tag'; tag: TagDTO; selected: boolean } | { type: 'create'; name: string };
@@ -12,24 +13,29 @@ interface TagSuggestionsProps {
   activeIndex: number;
   /** Режим поиска: рядом с названием показывается путь по дереву. */
   searching: boolean;
-  /** Тег, внутрь которого пользователь перешёл стрелкой «›». */
-  browseTag: TagDTO | null;
+  /** Путь внутрь дерева, по которому пользователь перешёл стрелкой «›». */
+  browseLabel: string | null;
   duplicate: TagDTO | null;
+  /** Цвет, который получит новый тег. */
+  newColor: string;
+  paletteOpen: boolean;
   onHover: (rowIndex: number) => void;
   onActivate: (row: SuggestionRow) => void;
   onDrill: (tag: TagDTO) => void;
   onBack: () => void;
   onUseDuplicate: () => void;
   onCancelDuplicate: () => void;
+  onTogglePalette: () => void;
+  onColorChange: (color: string) => void;
 }
 
 export const optionId = (listId: string, rowIndex: number) => `${listId}-option-${rowIndex}`;
 
 // Поле ввода не должно терять фокус при кликах внутри списка.
-const keepFocus = (event: MouseEvent) => event.preventDefault();
+export const keepFocus = (event: MouseEvent) => event.preventDefault();
 
 export function TagSuggestions(props: TagSuggestionsProps) {
-  const { listId, index, rows, activeIndex, searching, browseTag, duplicate } = props;
+  const { listId, index, rows, activeIndex, searching, browseLabel, duplicate, newColor, paletteOpen } = props;
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,19 +59,12 @@ export function TagSuggestions(props: TagSuggestionsProps) {
     );
   }
 
-  const parentPath = (tag: TagDTO) =>
-    index
-      .pathOf(tag.id)
-      .slice(0, -1)
-      .map((ancestor) => ancestor.name)
-      .join(' → ');
-
   return (
     <div className="tag-suggest" onMouseDown={keepFocus}>
-      {browseTag && (
+      {browseLabel && (
         <button type="button" className="tag-suggest__back" onClick={props.onBack}>
           <Icon name="chevronLeft" size={14} />
-          <span>{index.pathLabel(browseTag.id)}</span>
+          <span>{browseLabel}</span>
         </button>
       )}
 
@@ -82,21 +81,36 @@ export function TagSuggestions(props: TagSuggestionsProps) {
 
           if (row.type === 'create') {
             return (
-              <div
-                key="create"
-                {...common}
-                className={`tag-suggest__row tag-suggest__create${active ? ' is-active' : ''}`}
-              >
-                <Icon name="plus" size={14} />
-                <span className="tag-suggest__name">Создать «{row.name}»</span>
-                {activeIndex === -1 && <kbd className="tag-suggest__kbd">Enter</kbd>}
+              <div key="create" className="tag-suggest__create">
+                <div {...common} className={`tag-suggest__row${active ? ' is-active' : ''}`}>
+                  <Icon name="plus" size={14} />
+                  <span className="tag-suggest__name">Создать «{row.name}»</span>
+                  <button
+                    type="button"
+                    className="tag-suggest__color"
+                    style={{ '--swatch': newColor } as CSSProperties}
+                    aria-label="Цвет нового тега"
+                    aria-expanded={paletteOpen}
+                    title="Цвет нового тега"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      props.onTogglePalette();
+                    }}
+                  />
+                  {activeIndex === -1 && <kbd className="tag-suggest__kbd">Enter</kbd>}
+                </div>
+                {paletteOpen && (
+                  <div className="tag-suggest__palette">
+                    <ColorPicker value={newColor} onChange={props.onColorChange} />
+                  </div>
+                )}
               </div>
             );
           }
 
           const { tag } = row;
           const childCount = index.childrenOf(tag.id).length;
-          const path = searching ? parentPath(tag) : '';
+          const path = searching ? index.parentsLabel(tag.id) : '';
           return (
             <div
               key={tag.id}

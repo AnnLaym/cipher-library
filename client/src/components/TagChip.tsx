@@ -11,8 +11,6 @@ interface TagChipProps {
   selected?: boolean;
   /** Обводка — например, раскрытый тег в дереве. */
   active?: boolean;
-  /** Пунктир — тег ещё не создан и появится при сохранении. */
-  pending?: boolean;
   /** Дополнительное содержимое справа от названия. */
   trailing?: ReactNode;
   onClick?: () => void;
@@ -25,7 +23,6 @@ export function TagChip({
   size = 'sm',
   selected,
   active,
-  pending,
   trailing,
   onClick,
   onRemove,
@@ -35,7 +32,6 @@ export function TagChip({
     `tag-chip--${size}`,
     selected && 'is-selected',
     active && 'is-active',
-    pending && 'is-pending',
     onClick && 'is-clickable',
   ]
     .filter(Boolean)
